@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link href="./css/d3.geomap.css" rel="stylesheet">
+        <script src="./vendor/d3.geomap.dependencies.min.js"></script>
+        <script src="./js/d3.geomap.min.js"></script>
+        
+    </head>
+    <body>
+        <div id="map"></div>
+    </body>
+    <script >
+          var map = d3.geomap()
+            .geofile('/d3-geomap/topojson/world/countries.json');
+
+          d3.select('#map')
+            .call(map.draw, map);
+        </script>
+</html>
