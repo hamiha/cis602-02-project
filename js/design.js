@@ -60,12 +60,11 @@ var drawMap = function(mapData, data, key, htmlID) {
 		    	.text(function(d) {
 		        	return (_.isNil(playersCount[d.properties.name])) ? "" : d.properties.name + ": " + playersCount[d.properties.name];
 		    	})
-		    .on('mouseover', function(d, i) {
+		    .on("mouseover", function(d, i) {
 		    	console.log("hover");
                 var currentState = this;
-                d3.select(this).style('fill-opacity', 1);
-
-                })
+                d3.select(this).style('fill-opacity', 0.5);
+            });
 
 	var zoom = d3.zoom()
     .on("zoom",function() {
