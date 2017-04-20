@@ -11,9 +11,7 @@ var drawMap = function(mapData, data, key, htmlID) {
 			    .append("svg")
 			    .attr("width", width)
 			    .attr("height", height)
-			    .append("g");
-
-	var g = svg.append("g");
+			    
 	
 	var color = d3.scaleSequential(d3.interpolatePuBu);
 
@@ -36,17 +34,8 @@ var drawMap = function(mapData, data, key, htmlID) {
 
 	var maxCount = Math.max.apply(null, Object.keys(playersCount).map(function(key) { return playersCount[key]; }));
 
-	svg.append("defs").append("path")
-				    .datum({type: "Sphere"})
-				    .attr("id", "sphere")
-				    .attr("d", path);
-
-	svg.append("use")
-	    .attr("class", "bound")
-	    .attr("xlink:href", "#sphere");
-
 	/* append to svg */
-	g
+	svg.append("g")
 	    .selectAll("path")
 	    .data(mapData.features)
 	    .enter().append("path")
@@ -56,25 +45,29 @@ var drawMap = function(mapData, data, key, htmlID) {
 		    .attr("stroke", "#000")
 			.attr("stroke-width", 0.5)
 		    .attr("class", function(d) { return d.id })
+		    .on("mouseover", mouseOnState)
 		    .append("title")
 		    	.text(function(d) {
 		        	return (_.isNil(playersCount[d.properties.name])) ? "" : d.properties.name + ": " + playersCount[d.properties.name];
 		    	})
-		    .on("mouseover", function(d, i) {
-		    	console.log("hover");
-                var currentState = this;
-                d3.select(this).style('fill-opacity', 0.5);
-            });
-
+		    	
 	var zoom = d3.zoom()
     .on("zoom",function() {
-        g.attr("transform","translate("+ d3.event.transform.x + ',' + d3.event.transform.y +")scale("+d3.event.transform.k+")");
-        g.selectAll("path")  
+        svg.selectAll("g").attr("transform","translate("+ d3.event.transform.x + ',' + d3.event.transform.y +")scale("+d3.event.transform.k+")");
+        svg.selectAll("g").selectAll("path")  
             .attr("d", path.projection(projection)); 
 
-  	});
+  	})
+
 
 	svg.call(zoom);
+
+	function mouseOnState(){
+		// console.log("clicked");
+		d3.selectAll("path").classed("highlight", false);
+		var currentState = d3.select(this);
+		currentState.classed("highlight", true);
+	}
 }
 
 
@@ -85,15 +78,6 @@ function createVis(errors, mapData, womensData, mensData, teammateData) {
 
     /* Part 1 */
     drawMap(mapData, teammateData, "country_txt", "#world");
-
-    /* Part 2 */
-    // drawMap(mapData, mensData, "Nationality", "#map-men");
-
-    /* Part 3 */
-    // forceSimulation(teammateData, mensData, "#teammates");
-
-    /* Extra credit */
-    // barChart(mensData);
 
 }
 
