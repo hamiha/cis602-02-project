@@ -1,16 +1,15 @@
 var drawMap = function(mapData, data, key, htmlID) {
 
-	var width = 1000,
-	    height = 500,
-	    scale0 = (width - 1) / 2 / Math.PI;
+	var width = 1000;
+	var height = 500,
+	    scale0 = width/5;
 
-	// zoom
-	
 	/* draw svg and g elements */
 	var svg = d3.select(htmlID)
 			    .append("svg")
-			    .attr("width", width)
+			    .attr("width", "100%")
 			    .attr("height", height)
+			    .style("stroke", 0.5)
 			    
 	
 	var color = d3.scaleSequential(d3.interpolatePuBu);
@@ -29,9 +28,6 @@ var drawMap = function(mapData, data, key, htmlID) {
 		return d.properties.name;
 	});
 
-	// var sam = _.map(countries, function(value, key) { return { key: key, value: value }; })
-	// console.log(sam);
-
 	var maxCount = Math.max.apply(null, Object.keys(playersCount).map(function(key) { return playersCount[key]; }));
 
 	/* append to svg */
@@ -45,13 +41,16 @@ var drawMap = function(mapData, data, key, htmlID) {
 		    .attr("stroke", "#000")
 			.attr("stroke-width", 0.5)
 		    .attr("class", function(d) { return d.id })
+		    .attr("transform", "translate(150,100)")
 		    .on("mouseover", mouseOnState)
+		    .on("mouseout", mouseOutState)
+		    .on("click", clickOnState)
 		    .append("title")
 		    	.text(function(d) {
 		        	return (_.isNil(playersCount[d.properties.name])) ? "" : d.properties.name + ": " + playersCount[d.properties.name];
 		    	})
 		    	
-	var zoom = d3.zoom()
+	var zoom = d3.zoom().scaleExtent([1,3])
     .on("zoom",function() {
         svg.selectAll("g").attr("transform","translate("+ d3.event.transform.x + ',' + d3.event.transform.y +")scale("+d3.event.transform.k+")");
         svg.selectAll("g").selectAll("path")  
@@ -67,6 +66,15 @@ var drawMap = function(mapData, data, key, htmlID) {
 		d3.selectAll("path").classed("highlight", false);
 		var currentState = d3.select(this);
 		currentState.classed("highlight", true);
+	}
+	function mouseOutState(){
+		// console.log("clicked");
+		d3.selectAll("path").classed("highlight", false);
+	}
+	function clickOnState(){
+		var currentState = d3.select(this);
+		console.log(currentState.datum().properties.name);
+		// d3.selectAll("path").classed("highlight", false);
 	}
 }
 
