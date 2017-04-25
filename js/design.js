@@ -21,22 +21,22 @@ var drawMap = function(mapData, data, key, htmlID) {
 	var path = d3.geoPath()
 	    		.projection(projection);
 
-	var playersCount = _.countBy(data, key);
-	// var country = _.countBy(mapData.properties, "name");
-	console.log(playersCount);
-	var countries = mapData.features.map(function(d) {
-		return d.properties.name;
-	});
+	var terrCount = _.countBy(data, key);
+	
+	// console.log(terrCount);
+	// var countries = mapData.features.map(function(d) {
+	// 	return d.properties.name;
+	// });
 
-	var maxCount = Math.max.apply(null, Object.keys(playersCount).map(function(key) { return playersCount[key]; }));
-
+	var maxCount = Math.max.apply(null, Object.keys(terrCount).map(function(key) { return terrCount[key]; }));
+	
 	/* append to svg */
 	svg.append("g")
 	    .selectAll("path")
 	    .data(mapData.features)
 	    .enter().append("path")
 		    .attr("fill", function(d) {
-		        return (_.isNil(playersCount[d.properties.name])) ? "#fff" : color(playersCount[d.properties.name] / maxCount); })
+		        return (_.isNil(terrCount[d.properties.name])) ? "#fff" : color(terrCount[d.properties.name] / maxCount); })
 		    .attr("d", path)
 		    .attr("stroke", "#000")
 			.attr("stroke-width", 0.5)
@@ -47,7 +47,7 @@ var drawMap = function(mapData, data, key, htmlID) {
 		    .on("click", clickOnState)
 		    .append("title")
 		    	.text(function(d) {
-		        	return (_.isNil(playersCount[d.properties.name])) ? "" : d.properties.name + ": " + playersCount[d.properties.name];
+		        	return (_.isNil(terrCount[d.properties.name])) ? "" : d.properties.name + ": " + terrCount[d.properties.name];
 		    	})
 		    	
 	var zoom = d3.zoom().scaleExtent([1,3])
