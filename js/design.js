@@ -1,9 +1,70 @@
+var NUMBER_OF_COUNTRIES = 180;
+var TYPE_OF_ATTACK = "None", GLOBAL_YEAR, GLOBAL_DATA, GLOBAL_MAP;
+
+function filderByYear(data, year){
+	var dataByYear = data.filter(function(d){
+		return d.iyear == year;
+	})
+
+	return dataByYear;
+}
+function filterByType(data, type){
+	if(type !== "None"){
+		var filteredData = _.filter(data, function(d){
+			return d.attacktype1_txt == type;
+		})
+		return filteredData;
+	}
+	else return data;
+	
+}
+
+function getSuccessRate(data, country){
+	var filterByCountry = _.filter(data, function(d){
+		return d.country_txt == country;
+	})
+	var noOfSuccess = _.countBy(filterByCountry, "success");
+
+	return noOfSuccess[0] / noOfSuccess[1];
+}
+
+function setRanking(data){
+	
+	rank = [0];
+	var array = Object.keys(data).map(function(key) {
+	  	return [key, data[key]];
+	})
+	var sorted = _.sortBy(array, function(d){
+		rank.push(d[1]);
+		return d[1];
+	})
+
+	rank.sort(function(a, b){return a - b});
+
+	_.each(array, function(d){
+		ranking = _.indexOf(sorted, d) + 1;
+		d.push(ranking);
+	})
+	
+	// console.log(sorted);
+	// console.log(array);
+	// maxRanking = rank.length;
+
+	var obj = {};
+	array.forEach(function(d){
+		obj[d[0]] = d[2];
+	})
+	console.log(obj);
+	return obj;
+
+}
+
 var drawMap = function(mapData, data, key, htmlID) {
 
 	var width = 1000;
 	var height = 500,
 	    scale0 = width/5;
-
+	d3.select(htmlID).selectAll("svg").remove();
 	/* draw svg and g elements */
 	var svg = d3.select(htmlID)
 			    .append("svg")
@@ -21,14 +82,13 @@ var drawMap = function(mapData, data, key, htmlID) {
 	var path = d3.geoPath()
 	    		.projection(projection);
 
-	var terrCount = _.countBy(data, key);
-	
-	// console.log(terrCount);
-	// var countries = mapData.features.map(function(d) {
-	// 	return d.properties.name;
-	// });
+	var terrCount1 = _.countBy(data, key);
+
+	terrCount = setRanking(terrCount1);
 
 	var maxCount = Math.max.apply(null, Object.keys(terrCount).map(function(key) { return terrCount[key]; }));
+	console.log(maxCount);
+	// maxRanking = Math.max(totalRanking);
 	
 	/* append to svg */
 	svg.append("g")
@@ -76,22 +136,52 @@ var drawMap = function(mapData, data, key, htmlID) {
 		console.log(currentState.datum().properties.name);
 		// d3.selectAll("path").classed("highlight", false);
 	}
+
+}
+
+function filter(){
+	TYPE_OF_ATTACK = document.getElementById("typeOfAttack").value;
+	console.log(TYPE_OF_ATTACK);
+	data = filderByYear(GLOBAL_DATA, GLOBAL_YEAR);
+	data1 = filterByType(data, TYPE_OF_ATTACK);
+	// console.log(data1)
+	drawMap(GLOBAL_MAP, data1, "country_txt", "#world");
 }
 
 
-
-function createVis(errors, mapData, womensData, mensData, teammateData) {
+function createVis(errors, mapData, from2012to2015, from92to11, only93) {
+	GLOBAL_MAP = mapData;
+	GLOBAL_DATA = _.union(from92to11, from2012to2015, only93);
 
     if (errors) throw errors;
+    //create slide bar
+	var slider = document.getElementById('slider');
+	noUiSlider.create(slider, {
+		start: 2000,
+		connect: [true, false],
+		step: 1,
+		range: {
+			'min': 2000,
+			'max': 2015
+		}
+	});
+	var stepSliderValueElement = document.getElementById('year');
 
+	slider.noUiSlider.on('update', function( values, handle ) {
+		stepSliderValueElement.innerHTML = Number(values[handle]);
+		GLOBAL_YEAR = Number(values[handle]).toString()
+		var dataByYear = filderByYear(GLOBAL_DATA, GLOBAL_YEAR );
+		var dataByType = filterByType(dataByYear, TYPE_OF_ATTACK);
+		drawMap(mapData, dataByType, "country_txt", "#world");
+	});
     /* Part 1 */
-    drawMap(mapData, teammateData, "country_txt", "#world");
+    // drawMap(mapData, womensData, "country_txt", "#world");
 
 }
 
 d3.queue().defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/countries.geo.json")
-    .defer(d3.json, "https://cdn.rawgit.com/dakoop/e4fa063e3f3415f3d3c79456bc4b6dc5/raw/a9e01691802c8e70d94ce33a59e98529cc4324af/fifa-17-women.json")
-    .defer(d3.json, "https://cdn.rawgit.com/dakoop/e4fa063e3f3415f3d3c79456bc4b6dc5/raw/a9e01691802c8e70d94ce33a59e98529cc4324af/guardian-16-men.json")
+    .defer(d3.csv, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/data-society-global-terrorism-data/gtd_12to15_52134.csv")
+    .defer(d3.csv, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/data-society-global-terrorism-data/gtd_92to11_no%2093_55072.csv")
     .defer(d3.csv, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/1993.csv")
     .await(createVis);
 

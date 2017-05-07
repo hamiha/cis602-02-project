@@ -23,6 +23,17 @@
 	width: 100%;
 	height: 100vh;
 }
+#slider{
+    width: 40%;
+    margin: auto;
+
+}
+#year{
+    width: 40%;
+    margin: auto;
+    text-align: center;
+    padding: 5px;
+}
 .highlight {
       fill: #f00;
       stroke: #000;

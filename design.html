@@ -8,12 +8,31 @@
     <script src="https://cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v1.min.js"></script>
+    <link href="./css/nouislider.css" rel="stylesheet">
+    <script src="./js/nouislider.js"></script>
 </head>
 
 <body>
     <h1>World map</h1>
     <div id="world"></div>
-    <script type="text/javascript" src="./js/design.js"></script>
-</body>
+    <div id="slider"></div>
+    <p id="year">Year</p>
 
+    <div>
+    	<select id = "typeOfAttack" onchange="filter()">
+    		<option>None</option>
+    		<option>Assassination</option>
+    		<option>Hijacking</option>
+    		<option>Kidnapping</option>
+    		<option>Barricade Incident</option>
+    		<option>Bombing/Explosion</option>
+    		<option>Armed Assault</option>
+    		<option>Unarmed Assault</option>
+    		<option>Facility/Infrastructure Attack</option>
+    		<option>Unknown</option>
+    	</select>
+    </div>
+    
+</body>
+<script type="text/javascript" src="./js/design.js"></script>
 </html>
