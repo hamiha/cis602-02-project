@@ -37,3 +37,9 @@
 .highlight {
       fill: #f00;
       stroke: #000;
+}
+
+.highlightClicked {
+      fill: #f00;
+      stroke: #000;
+}

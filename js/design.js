@@ -1,8 +1,8 @@
 var NUMBER_OF_COUNTRIES = 180;
 var TYPE_OF_ATTACK = "None", GLOBAL_YEAR, GLOBAL_DATA, GLOBAL_MAP, GLOBAL_COUNTRY;
 
-var barW = 800,
-    barH = 500,
+var barW = 500,
+    barH = 300,
     barMargin = {top: 20, bottom: 120, left: 100, right: 20},
     barX = d3.scaleBand().padding(0.1),
     barY = d3.scaleLinear(),
@@ -170,6 +170,7 @@ function drawMap(mapData, data, key, htmlID) {
 	var terrCount1 = _.countBy(data, key);
 
 	terrCount = setRanking(data, terrCount1);
+	console.log(terrCount);
 
 	var maxCount = Math.max.apply(null, Object.keys(terrCount).map(function(key) { return terrCount[key]; }));
 	
@@ -185,12 +186,15 @@ function drawMap(mapData, data, key, htmlID) {
 			.attr("stroke-width", 0.5)
 		    .attr("class", function(d) { return d.id })
 		    .attr("transform", "translate(150,100)")
+		    .classed("highlightClicked", function(d){
+		    		return d.properties.name==GLOBAL_COUNTRY;
+		    })
 		    .on("mouseover", mouseOnState)
 		    .on("mouseout", mouseOutState)
 		    .on("click", clickOnState)
 		    .append("title")
 		    	.text(function(d) {
-		        	return (_.isNil(terrCount[d.properties.name])) ? "" : d.properties.name + ": " + terrCount[d.properties.name];
+		        	return (_.isNil(terrCount[d.properties.name])) ? d.properties.name +": 0" : d.properties.name + ": " + terrCount[d.properties.name];
 		    	})
 		    	
 	var zoom = d3.zoom().scaleExtent([1,3])
@@ -217,6 +221,8 @@ function drawMap(mapData, data, key, htmlID) {
 	function clickOnState(){
 		// console.log("clicked")
 		var currentState = d3.select(this);
+		d3.selectAll("path").classed("highlightClicked", false);
+		currentState.classed("highlightClicked", true);
 		GLOBAL_COUNTRY = currentState.datum().properties.name;
 		console.log(GLOBAL_COUNTRY);
 		drawLine("#line", "#legend");
@@ -241,7 +247,7 @@ function createLineChart(data, linechartID, legendID){
 	.domain([0, maxIncident * 1.2]);
 
 	barXAxis = d3.axisBottom(barXLine);
-    barYAxis = d3.axisLeft(barYLine);
+    barYAxis = d3.axisLeft(barYLine).ticks(10);
 
 	// console.log(d3.select(divID).selectAll("svg").empty())
 
@@ -253,19 +259,35 @@ function createLineChart(data, linechartID, legendID){
 			.attr("class", "main")
 			.attr("transform",
 			      "translate(" + barMargin.left + "," + barMargin.top + ")")
-	    svg.append("g")
+
+		svg.append("g")
 			.attr("transform", "translate(0," + barH +")")
 			.attr("class", "x axis")
 			.call(barXAxis)
 	    svg.append("g")
 			.attr("class", "y axis")
 			.call(barYAxis)
+		
+	}
+	else{
+		var svg = d3.select(linechartID).select("g")
+
+		svg.selectAll("text").remove();
+		svg.selectAll("g").remove();
+
+		svg.append("g")
+			.attr("transform", "translate(0," + barH +")")
+			.attr("class", "x axis")
+			.call(barXAxis)
+	    svg.append("g")
+			.attr("class", "y axis")
+			.call(barYAxis)
+
 		svg.append("g")
 			.attr("transform", "translate(-50," + (barH/2) + ") rotate(-90)")
 			.append("text")
 			.style("text-anchor", "middle")
 			.text("Number of incidient")
-
 	    svg.append("text")
 			.attr("x", barW/2)
 			.attr("y", barH + 60)
@@ -273,10 +295,9 @@ function createLineChart(data, linechartID, legendID){
 		svg.append("text")
 			.attr("id", "nameofcountry")
 			.attr("x", barW/2)
-			.attr("y", barH + 60)
-	}
-	else{
-		var svg = d3.select(linechartID).select("g")
+			.attr("y", barH + 80)
+			.text(GLOBAL_COUNTRY);
+		
 	}
 	svg.selectAll("path").remove().transition()
 			  .duration(750);
@@ -307,8 +328,6 @@ function createLineChart(data, linechartID, legendID){
 		        .attr("cy", 10)
 		        .attr("r", 10)
 		        .attr("fill", color);
-
-	col = 0;
 	_.each(types, function(s, i){
 		var type = s;
 		var line = d3.line()
@@ -324,15 +343,14 @@ function createLineChart(data, linechartID, legendID){
 			  .attr("d", line)
 
 	})
-		svg.select(".x.axis")
-			.transition()
-			.duration(750)
-			.call(barXAxis)
-		svg.select(".y.axis")
-			.transition()
-			.duration(750)
-			.call(barYAxis)
-
+		// svg.select(".x.axis")
+		// 	.transition()
+		// 	.duration(750)
+		// 	.call(barXAxis)
+		// svg.select(".y.axis")
+		// 	.transition()
+		// 	.duration(750)
+		// 	.call(barYAxis)
 }
 
 function drawLine(chartID, legendID){
@@ -380,7 +398,6 @@ function createVis(errors, mapData, from2012to2015, from92to11, only93) {
 		drawLine("#line", "#legend");
 
 	});
-
 }
 
 d3.queue().defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/countries.geo.json")
