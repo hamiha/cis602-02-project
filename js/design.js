@@ -219,11 +219,7 @@ function drawMap(mapData, data, key, htmlID) {
 		var currentState = d3.select(this);
 		GLOBAL_COUNTRY = currentState.datum().properties.name;
 		console.log(GLOBAL_COUNTRY);
-		var filterCountry = filterByCountry(GLOBAL_DATA, GLOBAL_COUNTRY);
-		var history = getHistory(filterCountry);
-		createLineChart(history, "#line", "#legend");
-
-		// d3.selectAll("path").classed("highlight", false);
+		drawLine("#line", "#legend");
 	}
 }
 
@@ -339,6 +335,13 @@ function createLineChart(data, linechartID, legendID){
 
 }
 
+function drawLine(chartID, legendID){
+	var filterCountry = filterByCountry(GLOBAL_DATA, GLOBAL_COUNTRY);
+	var filterType = filterByType(filterCountry, TYPE_OF_ATTACK);
+	var history = getHistory(filterType);
+	createLineChart(history, chartID, legendID);
+}
+
 //call from selection in html
 function filterBy(){
 	TYPE_OF_ATTACK = document.getElementById("typeOfAttack").value;
@@ -346,6 +349,7 @@ function filterBy(){
 	var data = filderByYear(GLOBAL_DATA, GLOBAL_YEAR);
 	var data1 = filterByType(data, TYPE_OF_ATTACK);
 	drawMap(GLOBAL_MAP, data1, "country_txt", "#world");
+	drawLine("#line", "#legend");
 }
 
 function createVis(errors, mapData, from2012to2015, from92to11, only93) {
@@ -373,9 +377,7 @@ function createVis(errors, mapData, from2012to2015, from92to11, only93) {
 		var dataByYear = filderByYear(GLOBAL_DATA, GLOBAL_YEAR );
 		var dataByType = filterByType(dataByYear, TYPE_OF_ATTACK);
 		drawMap(mapData, dataByType, "country_txt", "#world");
-		var filterCountry = filterByCountry(GLOBAL_DATA, GLOBAL_COUNTRY);
-		var history = getHistory(filterCountry);
-		createLineChart(history, "#line", "#legend");
+		drawLine("#line", "#legend");
 
 	});
 
