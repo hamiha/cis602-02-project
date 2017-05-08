@@ -1,7 +1,12 @@
-var NUMBER_OF_COUNTRIES = 180;
-var TYPE_OF_ATTACK = "None", GLOBAL_YEAR, GLOBAL_DATA, GLOBAL_MAP, GLOBAL_COUNTRY = "Global";
+var NUMBER_OF_COUNTRIES = 180,
+	TYPE_OF_ATTACK = "All", 
+	GLOBAL_YEAR, 
+	GLOBAL_DATA, 
+	GLOBAL_MAP, 
+	GLOBAL_COUNTRY = "Global",
+	PROCESSING = 0,
 
-var barW = 500,
+	barW = 500,
     barH = 300,
     barMargin = {top: 20, bottom: 120, left: 100, right: 20},
     barX = d3.scaleBand().padding(0.1),
@@ -86,7 +91,7 @@ function filderByYear(data, year){
 }
 
 function filterByType(data, type){
-	if(type !== "None"){
+	if(type !== "All"){
 		var filteredData = _.filter(data, function(d){
 			return d.attacktype1_txt == type;
 		})
@@ -351,14 +356,7 @@ function createLineChart(data, linechartID, legendID){
 			  .attr("d", line)
 
 	})
-		// svg.select(".x.axis")
-		// 	.transition()
-		// 	.duration(750)
-		// 	.call(barXAxis)
-		// svg.select(".y.axis")
-		// 	.transition()
-		// 	.duration(750)
-		// 	.call(barYAxis)
+
 }
 
 function drawLine(chartID, legendID){
@@ -376,11 +374,12 @@ function filterBy(){
 	// console.log(TYPE_OF_ATTACK);
 	var data = filderByYear(GLOBAL_DATA, GLOBAL_YEAR);
 	var data1 = filterByType(data, TYPE_OF_ATTACK);
-	drawMap(GLOBAL_MAP, data1, "country_txt", "#world");
+	drawMap(GLOBAL_MAP, data1, "country_txt", ".world");
 	drawLine("#line", "#legend");
 }
 
 function createVis(errors, mapData, from2012to2015, from92to11, only93) {
+	
 	GLOBAL_MAP = mapData;
 	GLOBAL_DATA = _.union(from92to11, from2012to2015, only93);
 
@@ -388,7 +387,7 @@ function createVis(errors, mapData, from2012to2015, from92to11, only93) {
     //create slide bar
 	var slider = document.getElementById('slider');
 	noUiSlider.create(slider, {
-		start: 2015,
+		start: 2002,
 		connect: [true, false],
 		step: 1,
 		range: {
@@ -399,12 +398,13 @@ function createVis(errors, mapData, from2012to2015, from92to11, only93) {
 	var stepSliderValueElement = document.getElementById('year');
 
 	slider.noUiSlider.on('update', function( values, handle ) {
+		Pace.restart();
 		stepSliderValueElement.innerHTML = Number(values[handle]);
 		GLOBAL_YEAR = Number(values[handle]).toString()
 		var history = getHistory(GLOBAL_DATA);
 		var dataByYear = filderByYear(GLOBAL_DATA, GLOBAL_YEAR );
 		var dataByType = filterByType(dataByYear, TYPE_OF_ATTACK);
-		drawMap(mapData, dataByType, "country_txt", "#world");
+		drawMap(mapData, dataByType, "country_txt", ".world");
 		drawLine("#line", "#legend");
 
 	});
