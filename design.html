@@ -10,6 +10,7 @@
     <script src="https://d3js.org/d3-geo-projection.v1.min.js"></script>
     <link href="./css/nouislider.css" rel="stylesheet">
     <script src="./js/nouislider.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -19,12 +20,12 @@
     <p id="year">Year</p>
 
     <div>
-    	<select id = "typeOfAttack" onchange="filter()">
+    	<select id = "typeOfAttack" onchange="filterBy()">
     		<option>None</option>
     		<option>Assassination</option>
     		<option>Hijacking</option>
-    		<option>Kidnapping</option>
-    		<option>Barricade Incident</option>
+    		<option>Hostage Taking (Kidnapping)</option>
+    		<option>Hostage Taking (Barricade Incident)</option>
     		<option>Bombing/Explosion</option>
     		<option>Armed Assault</option>
     		<option>Unarmed Assault</option>
@@ -32,6 +33,8 @@
     		<option>Unknown</option>
     	</select>
     </div>
+    <div id="legend"></div>
+    <div id="line"></div>
     
 </body>
 <script type="text/javascript" src="./js/design.js"></script>
