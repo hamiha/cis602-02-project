@@ -1,5 +1,5 @@
 var NUMBER_OF_COUNTRIES = 180;
-var TYPE_OF_ATTACK = "None", GLOBAL_YEAR, GLOBAL_DATA, GLOBAL_MAP, GLOBAL_COUNTRY;
+var TYPE_OF_ATTACK = "None", GLOBAL_YEAR, GLOBAL_DATA, GLOBAL_MAP, GLOBAL_COUNTRY = "Global";
 
 var barW = 500,
     barH = 300,
@@ -82,7 +82,6 @@ function filderByYear(data, year){
 	var dataByYear = data.filter(function(d){
 		return d.iyear == year;
 	})
-
 	return dataByYear;
 }
 
@@ -170,7 +169,7 @@ function drawMap(mapData, data, key, htmlID) {
 	var terrCount1 = _.countBy(data, key);
 
 	terrCount = setRanking(data, terrCount1);
-	console.log(terrCount);
+	// console.log(terrCount);
 
 	var maxCount = Math.max.apply(null, Object.keys(terrCount).map(function(key) { return terrCount[key]; }));
 	
@@ -221,10 +220,19 @@ function drawMap(mapData, data, key, htmlID) {
 	function clickOnState(){
 		// console.log("clicked")
 		var currentState = d3.select(this);
-		d3.selectAll("path").classed("highlightClicked", false);
-		currentState.classed("highlightClicked", true);
-		GLOBAL_COUNTRY = currentState.datum().properties.name;
-		console.log(GLOBAL_COUNTRY);
+		// console.log(currentState.classed("highlightClicked"));
+		if(!currentState.classed("highlightClicked")){
+			// console.log("empty");
+			d3.selectAll("path").classed("highlightClicked", false);
+			currentState.classed("highlightClicked", true);
+			GLOBAL_COUNTRY = currentState.datum().properties.name;
+		}
+		else{
+			// console.log("not empty");
+			currentState.classed("highlightClicked", false);
+			GLOBAL_COUNTRY = "Global"; 	
+		} 
+		// console.log(GLOBAL_COUNTRY);
 		drawLine("#line", "#legend");
 	}
 }
@@ -354,7 +362,9 @@ function createLineChart(data, linechartID, legendID){
 }
 
 function drawLine(chartID, legendID){
-	var filterCountry = filterByCountry(GLOBAL_DATA, GLOBAL_COUNTRY);
+	if(GLOBAL_COUNTRY !== "Global")
+		var filterCountry = filterByCountry(GLOBAL_DATA, GLOBAL_COUNTRY);
+	else var filterCountry = GLOBAL_DATA;
 	var filterType = filterByType(filterCountry, TYPE_OF_ATTACK);
 	var history = getHistory(filterType);
 	createLineChart(history, chartID, legendID);
@@ -363,7 +373,7 @@ function drawLine(chartID, legendID){
 //call from selection in html
 function filterBy(){
 	TYPE_OF_ATTACK = document.getElementById("typeOfAttack").value;
-	console.log(TYPE_OF_ATTACK);
+	// console.log(TYPE_OF_ATTACK);
 	var data = filderByYear(GLOBAL_DATA, GLOBAL_YEAR);
 	var data1 = filterByType(data, TYPE_OF_ATTACK);
 	drawMap(GLOBAL_MAP, data1, "country_txt", "#world");
@@ -378,7 +388,7 @@ function createVis(errors, mapData, from2012to2015, from92to11, only93) {
     //create slide bar
 	var slider = document.getElementById('slider');
 	noUiSlider.create(slider, {
-		start: 2000,
+		start: 2015,
 		connect: [true, false],
 		step: 1,
 		range: {
