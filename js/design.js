@@ -16,7 +16,6 @@ function filterByType(data, type){
 		return filteredData;
 	}
 	else return data;
-	
 }
 
 function getSuccessRate(data, country){
@@ -24,20 +23,24 @@ function getSuccessRate(data, country){
 		return d.country_txt == country;
 	})
 	var noOfSuccess = _.countBy(filterByCountry, "success");
-
-	return noOfSuccess[0] / noOfSuccess[1];
+	var noOfIncidient = _.countBy(filterByCountry, country);
+	if(noOfSuccess[1] == undefined)
+		return 0;
+	else return noOfSuccess[1] / (noOfIncidient.undefined);
 }
 
-function setRanking(data){
+function setRanking(data, noOfIncidient){
 	
 	rank = [0];
-	var array = Object.keys(data).map(function(key) {
-	  	return [key, data[key]];
+	var array = Object.keys(noOfIncidient).map(function(key) {
+		var successRate = getSuccessRate(data, key.toString());
+	  	return [key, noOfIncidient[key], successRate];
 	})
-	var sorted = _.sortBy(array, function(d){
+
+	_.each(array, function(d){
 		rank.push(d[1]);
-		return d[1];
 	})
+	var sorted = _.sortBy(array, ["1", "2"])
 
 	rank.sort(function(a, b){return a - b});
 
@@ -45,16 +48,14 @@ function setRanking(data){
 		ranking = _.indexOf(sorted, d) + 1;
 		d.push(ranking);
 	})
-	
-	// console.log(sorted);
+
 	// console.log(array);
-	// maxRanking = rank.length;
 
 	var obj = {};
 	array.forEach(function(d){
-		obj[d[0]] = d[2];
+		obj[d[0]] = d[3];
 	})
-	console.log(obj);
+	// console.log(obj);
 	return obj;
 
 }
@@ -84,11 +85,9 @@ var drawMap = function(mapData, data, key, htmlID) {
 
 	var terrCount1 = _.countBy(data, key);
 
-	terrCount = setRanking(terrCount1);
+	terrCount = setRanking(data, terrCount1);
 
 	var maxCount = Math.max.apply(null, Object.keys(terrCount).map(function(key) { return terrCount[key]; }));
-	console.log(maxCount);
-	// maxRanking = Math.max(totalRanking);
 	
 	/* append to svg */
 	svg.append("g")
@@ -132,6 +131,7 @@ var drawMap = function(mapData, data, key, htmlID) {
 		d3.selectAll("path").classed("highlight", false);
 	}
 	function clickOnState(){
+		console.log("clicked")
 		var currentState = d3.select(this);
 		console.log(currentState.datum().properties.name);
 		// d3.selectAll("path").classed("highlight", false);
