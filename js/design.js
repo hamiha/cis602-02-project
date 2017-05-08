@@ -15,6 +15,14 @@ var NUMBER_OF_COUNTRIES = 180,
     barYLine = d3.scaleLinear(),
     barXAxis = null;
 
+function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+}
+
+function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+}
+
 function generateYears(year){
 	var years = [];
 	var start = 2000;
@@ -83,9 +91,10 @@ function getHistory(data){
 	return history;
 }
 
+
 function filderByYear(data, year){
 	var dataByYear = data.filter(function(d){
-		return d.iyear == year;
+		return d.iyear <= year && d.iyear >= 2000;
 	})
 	return dataByYear;
 }
@@ -118,6 +127,25 @@ function getSuccessRate(data, country){
 	else return noOfSuccess[1] / (noOfIncidient.undefined);
 }
 
+function getSuccesRateArray(data){
+
+	if(GLOBAL_COUNTRY !== "Global")
+		var dataByCounty = filterByCountry(data, GLOBAL_COUNTRY);
+	else var dataByCounty = data;
+	var successCount = _.countBy(dataByCounty, "success");
+	console.log(successCount);
+	if (successCount.length != 0) {
+		if (successCount[0] != undefined) {
+			totalIncidents = successCount[0] + successCount[1];
+			sucRate = Math.round(successCount[1]/totalIncidents * 100);
+			return [{"name": "Success","percentage": sucRate, "color": "#ff0000"}, {"name": "Fail","percentage": 100 - sucRate, "color": "#009933"}];
+		}	
+		return [{"name": "Success","percentage": 100, "color": "#ff0000"}, {"name": "Fail","percentage": 0, "color": "#009933"}];
+	}
+	// console.log(successCount[0]);
+
+}
+
 function setRanking(data, noOfIncidient){
 	
 	var rank = [0];
@@ -146,6 +174,94 @@ function setRanking(data, noOfIncidient){
 	})
 	// console.log(obj);
 	return obj;
+}
+
+var drawLegend = function(divId, data) {
+
+    /* legend */
+    var radius = 9,
+        noteFontSize = 12;
+
+    var width = 200,
+        height = 300;
+
+    var legend = d3.select(divId)
+                        .append('g')
+                        .attr('class', 'legend')
+                        .attr('transform', 'translate(' + 100 + ', ' + height * 1.5 + ')')
+                        .selectAll('g')
+                        .data(data)
+                        .enter().append('g')
+                            .attr('class', function(d) { return d.name; })
+                            .attr('transform', function(d, i) { return 'translate(0,' + (i * (radius + 1) * 2) + ')'; });
+
+    /* append country names */
+    legend.append('text')
+            .attr('font-size', noteFontSize)
+            .attr('text-anchor', 'end')
+            .attr('x', width - (radius * 1.5))
+            .attr('y', radius / 2)
+            .text(function(d) { return d.name; });
+
+    /* append color circles */
+    legend.append("circle")
+	       	.attr("cx", 10)
+	        .attr("cy", 10)
+	        .attr("r", 10)
+            // .attr("width", 20)
+            // .attr("height", 20)
+            .attr('fill', function(d) { return d.color; });
+}
+
+function drawPie(htmlID, data){
+	// console.log(data);
+	var width = 200,
+    height = 300,
+    radius = 100;
+
+	var arc = d3.arc()
+	.outerRadius(radius - 10)
+	.innerRadius(0);
+
+	var pie = d3.pie()
+    .sort(null)
+    .value(function(d) {
+        return d.percentage;
+    });
+    d3.select(htmlID).selectAll("svg").remove();
+	var svg = d3.select(htmlID).append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    var g = svg.selectAll(".arc")
+      .data(pie(data))
+      .enter().append("g");    
+
+   	g.append("path")
+    	.attr("d", arc)
+      .style("fill", function(d,i) {
+      	return d.data.color;
+      });
+
+    g.append("text")
+    	.attr("transform", function(d) {
+        var _d = arc.centroid(d);
+        _d[0] *= 2.2;	//multiply by a constant factor
+        _d[1] *= 2.2;	//multiply by a constant factor
+        return "translate(" + _d + ")";
+      })
+      .attr("dy", ".50em")
+      .style("text-anchor", "middle")
+      .text(function(d) {
+        if(d.data.percentage == 0) {
+          return '';
+        }
+        return d.data.percentage + '%';
+      });
+
+      
 }
 
 function drawMap(mapData, data, key, htmlID) {
@@ -201,7 +317,7 @@ function drawMap(mapData, data, key, htmlID) {
 		        	return (_.isNil(terrCount[d.properties.name])) ? d.properties.name +": 0" : d.properties.name + ": " + terrCount[d.properties.name];
 		    	})
 		    	
-	var zoom = d3.zoom().scaleExtent([1,3])
+	var zoom = d3.zoom().scaleExtent([1,1])
     .on("zoom",function() {
         svg.selectAll("g").attr("transform","translate("+ d3.event.transform.x + ',' + d3.event.transform.y +")scale("+d3.event.transform.k+")");
         svg.selectAll("g").selectAll("path")  
@@ -239,6 +355,10 @@ function drawMap(mapData, data, key, htmlID) {
 		} 
 		// console.log(GLOBAL_COUNTRY);
 		drawLine("#line", "#legend");
+		var suc = getSuccesRateArray(data);
+		drawPie("#pie", suc);
+		console.log(suc);
+		
 	}
 }
 
@@ -372,10 +492,12 @@ function drawLine(chartID, legendID){
 function filterBy(){
 	TYPE_OF_ATTACK = document.getElementById("typeOfAttack").value;
 	// console.log(TYPE_OF_ATTACK);
-	var data = filderByYear(GLOBAL_DATA, GLOBAL_YEAR);
-	var data1 = filterByType(data, TYPE_OF_ATTACK);
-	drawMap(GLOBAL_MAP, data1, "country_txt", ".world");
+	var filteredData = getFilterData();
+	drawMap(GLOBAL_MAP, filteredData, "country_txt", ".world");
 	drawLine("#line", "#legend");
+	var suc = getSuccesRateArray(filteredData);
+	drawPie("#pie", suc);
+	console.log(suc);
 }
 
 function createVis(errors, mapData, from2012to2015, from92to11, only93) {
@@ -402,12 +524,21 @@ function createVis(errors, mapData, from2012to2015, from92to11, only93) {
 		stepSliderValueElement.innerHTML = Number(values[handle]);
 		GLOBAL_YEAR = Number(values[handle]).toString()
 		var history = getHistory(GLOBAL_DATA);
-		var dataByYear = filderByYear(GLOBAL_DATA, GLOBAL_YEAR );
-		var dataByType = filterByType(dataByYear, TYPE_OF_ATTACK);
-		drawMap(mapData, dataByType, "country_txt", ".world");
+		var filteredData =	getFilterData();
+		drawMap(mapData, filteredData, "country_txt", ".world");
 		drawLine("#line", "#legend");
+		var suc = getSuccesRateArray(filteredData);
+		drawLegend("#legendPie", suc);
+		drawPie("#pie", suc);
+
 
 	});
+}
+
+function getFilterData(){
+	var dataByYear = filderByYear(GLOBAL_DATA, GLOBAL_YEAR );
+	var dataByType = filterByType(dataByYear, TYPE_OF_ATTACK);
+	return dataByType;
 }
 
 d3.queue().defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/countries.geo.json")

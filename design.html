@@ -16,10 +16,16 @@
 
 <body>
     <h1>Global peace</h1>
-    <div class="world"></div>
+      
+    <div class="world">
+        <div id="mySidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        </div>
+        <span onclick="openNav()">Global Ranking</span>
+    </div>
     <div id="slider"></div>
     <p id="year">Year</p>
-
+    
     <div>Type of attacking:
     	<select id = "typeOfAttack" onchange="filterBy()">
     		<option>All</option>
@@ -37,6 +43,8 @@
     <div id=container>
         <div id="legend"></div>
         <div id="line"></div>
+        <div id="pie"></div>
+        <div id="legendPie"></div>
     </div>
     
 </body>

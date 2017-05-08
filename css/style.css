@@ -56,13 +56,51 @@
 }
 
 #legend {
+    padding-top: 20px;
     display: inline-block;
-    width: 30%;
+    width: 15%;
 }
 #line {
     display: inline-block;
-    width: 70%;
+    width: 50%;
 }
+#pie {
+    display: inline-block;
+    width: 25%;
+}
+
+/* The side navigation menu */
+.sidenav {
+    height: 420px; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: absolute; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    margin-top: 20px;
+    left: 0;
+    background-color: #111; /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 60px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+
+
+/* Position and style the close button (top right corner) */
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+}
+
+
+
 .pace {
   -webkit-pointer-events: none;
   pointer-events: none;
