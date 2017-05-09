@@ -64,6 +64,9 @@
     display: inline-block;
     width: 50%;
 }
+#legendPie {
+  margin-bottom: -130px;
+}
 #pie {
     display: inline-block;
     width: 25%;

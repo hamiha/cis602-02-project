@@ -1,8 +1,8 @@
 var NUMBER_OF_COUNTRIES = 180,
-	TYPE_OF_ATTACK = "All", 
-	GLOBAL_YEAR, 
-	GLOBAL_DATA, 
-	GLOBAL_MAP, 
+	TYPE_OF_ATTACK = "All",
+	GLOBAL_YEAR,
+	GLOBAL_DATA,
+	GLOBAL_MAP,
 	GLOBAL_COUNTRY = "Global",
 	PROCESSING = 0,
 
@@ -48,7 +48,7 @@ function getHistotyBySpecificType(data, years){
 		var totals = {};
 		var total = _.map(dat, function(s){
 			return [s[0][d], s[0].type];
-		}) 	
+		})
 		// console.log(total);
 		totals["year"] = d;
 		var max = 0;
@@ -58,7 +58,7 @@ function getHistotyBySpecificType(data, years){
 		})
 		totals["max"] = max;
 		history.push(totals);
-		
+
 	})
 	// console.log(history);
 	return history;
@@ -71,7 +71,7 @@ function getHistory(data){
 	})
 	var years = _.uniq(historyByYear.map(function(d) { return d.iyear }));
 	var types = _.uniq(_.map(data, function(d) { return d.attacktype1_txt }));
-	
+
 	_.each(types, function(d) {
 			history.push({"type": d});
 	});
@@ -139,7 +139,7 @@ function getSuccesRateArray(data){
 			totalIncidents = successCount[0] + successCount[1];
 			sucRate = Math.round(successCount[1]/totalIncidents * 100);
 			return [{"name": "Success","percentage": sucRate, "color": "#ff0000"}, {"name": "Fail","percentage": 100 - sucRate, "color": "#009933"}];
-		}	
+		}
 		return [{"name": "Success","percentage": 100, "color": "#ff0000"}, {"name": "Fail","percentage": 0, "color": "#009933"}];
 	}
 	// console.log(successCount[0]);
@@ -147,7 +147,7 @@ function getSuccesRateArray(data){
 }
 
 function setRanking(data, noOfIncidient){
-	
+
 	var rank = [0];
 	var array = Object.keys(noOfIncidient).map(function(key) {
 		var successRate = getSuccessRate(data, key.toString());
@@ -178,6 +178,8 @@ function setRanking(data, noOfIncidient){
 
 var drawLegend = function(divId, data) {
 
+	d3.select(divId).selectAll("svg").remove();
+
     /* legend */
     var radius = 9,
         noteFontSize = 12;
@@ -186,14 +188,15 @@ var drawLegend = function(divId, data) {
         height = 300;
 
     var legend = d3.select(divId)
-                        .append('g')
-                        .attr('class', 'legend')
-                        .attr('transform', 'translate(' + 100 + ', ' + height * 1.5 + ')')
-                        .selectAll('g')
-                        .data(data)
-                        .enter().append('g')
-                            .attr('class', function(d) { return d.name; })
-                            .attr('transform', function(d, i) { return 'translate(0,' + (i * (radius + 1) * 2) + ')'; });
+                    .append('svg')
+                    .append('g')
+                    .attr('class', 'legend')
+                    .attr('transform', 'translate(0,20)')
+                    .selectAll('g')
+                    .data(data)
+                    .enter().append('g')
+                        .attr('class', function(d) { return d.name; })
+                        .attr('transform', function(d, i) { return 'translate(0,' + (i * (radius + 1) * 2) + ')'; });
 
     /* append country names */
     legend.append('text')
@@ -205,17 +208,15 @@ var drawLegend = function(divId, data) {
 
     /* append color circles */
     legend.append("circle")
-	       	.attr("cx", 10)
-	        .attr("cy", 10)
-	        .attr("r", 10)
-            // .attr("width", 20)
-            // .attr("height", 20)
+	       	.attr("cx", width)
+	        .attr("cy", 0)
+	        .attr("r", radius)
             .attr('fill', function(d) { return d.color; });
 }
 
 function drawPie(htmlID, data){
-	// console.log(data);
-	var width = 200,
+
+	var width = 250,
     height = 300,
     radius = 100;
 
@@ -237,7 +238,7 @@ function drawPie(htmlID, data){
 
     var g = svg.selectAll(".arc")
       .data(pie(data))
-      .enter().append("g");    
+      .enter().append("g");
 
    	g.append("path")
     	.attr("d", arc)
@@ -248,8 +249,8 @@ function drawPie(htmlID, data){
     g.append("text")
     	.attr("transform", function(d) {
         var _d = arc.centroid(d);
-        _d[0] *= 2.2;	//multiply by a constant factor
-        _d[1] *= 2.2;	//multiply by a constant factor
+        _d[0] *= 2.4;
+        _d[1] *= 2.4;
         return "translate(" + _d + ")";
       })
       .attr("dy", ".50em")
@@ -260,8 +261,6 @@ function drawPie(htmlID, data){
         }
         return d.data.percentage + '%';
       });
-
-      
 }
 
 function drawMap(mapData, data, key, htmlID) {
@@ -276,8 +275,8 @@ function drawMap(mapData, data, key, htmlID) {
 			    .attr("width", "100%")
 			    .attr("height", height)
 			    .style("stroke", 0.5)
-			    
-	
+
+
 	var color = d3.scaleSequential(d3.interpolatePuBu);
 
 	/* map projection */
@@ -293,7 +292,7 @@ function drawMap(mapData, data, key, htmlID) {
 	// console.log(terrCount);
 
 	var maxCount = Math.max.apply(null, Object.keys(terrCount).map(function(key) { return terrCount[key]; }));
-	
+
 	/* append to svg */
 	svg.append("g")
 	    .selectAll("path")
@@ -316,12 +315,12 @@ function drawMap(mapData, data, key, htmlID) {
 		    	.text(function(d) {
 		        	return (_.isNil(terrCount[d.properties.name])) ? d.properties.name +": 0" : d.properties.name + ": " + terrCount[d.properties.name];
 		    	})
-		    	
+
 	var zoom = d3.zoom().scaleExtent([1,1])
     .on("zoom",function() {
         svg.selectAll("g").attr("transform","translate("+ d3.event.transform.x + ',' + d3.event.transform.y +")scale("+d3.event.transform.k+")");
-        svg.selectAll("g").selectAll("path")  
-            .attr("d", path.projection(projection)); 
+        svg.selectAll("g").selectAll("path")
+            .attr("d", path.projection(projection));
 
   	})
 
@@ -351,14 +350,14 @@ function drawMap(mapData, data, key, htmlID) {
 		else{
 			// console.log("not empty");
 			currentState.classed("highlightClicked", false);
-			GLOBAL_COUNTRY = "Global"; 	
-		} 
+			GLOBAL_COUNTRY = "Global";
+		}
 		// console.log(GLOBAL_COUNTRY);
 		drawLine("#line", "#legend");
 		var suc = getSuccesRateArray(data);
 		drawPie("#pie", suc);
 		console.log(suc);
-		
+
 	}
 }
 
@@ -400,7 +399,7 @@ function createLineChart(data, linechartID, legendID){
 	    svg.append("g")
 			.attr("class", "y axis")
 			.call(barYAxis)
-		
+
 	}
 	else{
 		var svg = d3.select(linechartID).select("g")
@@ -430,18 +429,18 @@ function createLineChart(data, linechartID, legendID){
 			.attr("x", barW/2)
 			.attr("y", barH + 80)
 			.text(GLOBAL_COUNTRY);
-		
+
 	}
 	svg.selectAll("path").remove().transition()
 			  .duration(750);
 	if(d3.selectAll(legendID).selectAll("svg").empty()){
 		var legendsvg = d3.selectAll(legendID).append("svg")
 			.attr("width", 200)
-			.attr("height", 200);		
+			.attr("height", 200);
 	}
 	else var legendsvg = d3.selectAll(legendID).selectAll("svg")
-	if (!legendsvg.selectAll("g").empty()) {	
-		legendsvg.selectAll("g").remove(); 
+	if (!legendsvg.selectAll("g").empty()) {
+		legendsvg.selectAll("g").remove();
 	}
 		var leg =legendsvg.append("g")
 		                    .attr("class", "legend")
@@ -465,8 +464,8 @@ function createLineChart(data, linechartID, legendID){
 		var type = s;
 		var line = d3.line()
         	.x(function(d) { return barXLine(d.year); })
-        	.y(function(d) { 
-        		if(d[type] !== undefined) return barYLine(d[type]); 
+        	.y(function(d) {
+        		if(d[type] !== undefined) return barYLine(d[type]);
         		else return barYLine(0);
         	});
         svg.append("path")
@@ -501,7 +500,7 @@ function filterBy(){
 }
 
 function createVis(errors, mapData, from2012to2015, from92to11, only93) {
-	
+
 	GLOBAL_MAP = mapData;
 	GLOBAL_DATA = _.union(from92to11, from2012to2015, only93);
 
