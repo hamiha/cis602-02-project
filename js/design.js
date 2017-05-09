@@ -128,21 +128,24 @@ function getSuccessRate(data, country){
 }
 
 function getSuccesRateArray(data){
-
+	// console.log(data);
 	if(GLOBAL_COUNTRY !== "Global")
 		var dataByCounty = filterByCountry(data, GLOBAL_COUNTRY);
 	else var dataByCounty = data;
 	var successCount = _.countBy(dataByCounty, "success");
-	console.log(successCount);
-	if (successCount.length != 0) {
-		if (successCount[0] != undefined) {
-			totalIncidents = successCount[0] + successCount[1];
-			sucRate = Math.round(successCount[1]/totalIncidents * 100);
-			return [{"name": "Success","percentage": sucRate, "color": "#ff0000"}, {"name": "Fail","percentage": 100 - sucRate, "color": "#009933"}];
-		}
-		return [{"name": "Success","percentage": 100, "color": "#ff0000"}, {"name": "Fail","percentage": 0, "color": "#009933"}];
+	console.log(_.isEmpty(successCount));
+	if (!_.isEmpty(successCount)) {
+		var noOfSuccess, noOfFail;
+		noOfFail = (successCount[0] == undefined) ? 0 : successCount[0];
+		noOfSuccess = (successCount[1] == undefined) ? 0 : successCount[1];
+		totalIncidents = noOfFail + noOfSuccess;
+		sucRate = Math.round(noOfSuccess/totalIncidents * 100);
+		return [{"name": "Success","percentage": sucRate, "color": "#ff0000"}, {"name": "Fail","percentage": 100 - sucRate, "color": "#009933"}];
 	}
-	// console.log(successCount[0]);
+	else {
+		// console.log("eks")
+		return [{"name": "Success","percentage": 0, "color": "#ff0000"}, {"name": "Fail","percentage": 0, "color": "#009933"}]
+	}// console.log(successCount[0]);
 
 }
 
@@ -188,22 +191,22 @@ var drawLegend = function(divId, data) {
         height = 300;
 
     var legend = d3.select(divId)
-                    .append('svg')
-                    .append('g')
-                    .attr('class', 'legend')
-                    .attr('transform', 'translate(0,20)')
-                    .selectAll('g')
+                    .append("svg")
+                    .append("g")
+                    .attr("class", "legend")
+                    .attr("transform", "translate(0,20)")
+                    .selectAll("g")
                     .data(data)
-                    .enter().append('g')
-                        .attr('class', function(d) { return d.name; })
-                        .attr('transform', function(d, i) { return 'translate(0,' + (i * (radius + 1) * 2) + ')'; });
+                    .enter().append("g")
+                        .attr("class", function(d) { return d.name; })
+                        .attr("transform", function(d, i) { return "translate(0," + (i * (radius + 1) * 2) + ")"; });
 
     /* append country names */
-    legend.append('text')
-            .attr('font-size', noteFontSize)
-            .attr('text-anchor', 'end')
-            .attr('x', width - (radius * 1.5))
-            .attr('y', radius / 2)
+    legend.append("text")
+            .attr("font-size", noteFontSize)
+            .attr("text-anchor", "end")
+            .attr("x", width - (radius * 1.5))
+            .attr("y", radius / 2)
             .text(function(d) { return d.name; });
 
     /* append color circles */
@@ -211,11 +214,12 @@ var drawLegend = function(divId, data) {
 	       	.attr("cx", width)
 	        .attr("cy", 0)
 	        .attr("r", radius)
-            .attr('fill', function(d) { return d.color; });
+            .attr("fill", function(d) { return d.color; });
 }
 
 function drawPie(htmlID, data){
 
+	console.log(data);
 	var width = 250,
     height = 300,
     radius = 100;
