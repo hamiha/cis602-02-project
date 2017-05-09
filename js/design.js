@@ -218,8 +218,6 @@ var drawLegend = function(divId, data) {
 }
 
 function drawPie(htmlID, data){
-
-	console.log(data);
 	var width = 250,
     height = 300,
     radius = 100;
@@ -360,7 +358,6 @@ function drawMap(mapData, data, key, htmlID) {
 		drawLine("#line", "#legend");
 		var suc = getSuccesRateArray(data);
 		drawPie("#pie", suc);
-		console.log(suc);
 
 	}
 }
@@ -418,7 +415,7 @@ function createLineChart(data, linechartID, legendID){
 	    svg.append("g")
 			.attr("class", "y axis")
 			.call(barYAxis)
-
+	}
 		svg.append("g")
 			.attr("transform", "translate(-50," + (barH/2) + ") rotate(-90)")
 			.append("text")
@@ -434,9 +431,8 @@ function createLineChart(data, linechartID, legendID){
 			.attr("y", barH + 80)
 			.text(GLOBAL_COUNTRY);
 
-	}
-	svg.selectAll("path").remove().transition()
-			  .duration(750);
+	svg.selectAll("path").remove();
+	
 	if(d3.selectAll(legendID).selectAll("svg").empty()){
 		var legendsvg = d3.selectAll(legendID).append("svg")
 			.attr("width", 200)
@@ -500,19 +496,23 @@ function filterBy(){
 	drawLine("#line", "#legend");
 	var suc = getSuccesRateArray(filteredData);
 	drawPie("#pie", suc);
-	console.log(suc);
 }
 
-function createVis(errors, mapData, from2012to2015, from92to11, only93) {
+function filterYear(data, year){
+
+	index = year%2000;
+	return data[index]
+}
+
+function createVis(errors, mapData, year2000, year2001, year2002, year2003, year2004, year2005, year2006, year2007, year2008, year2009, year2010, year2011, year2012, year2012, year2014, year2015) {
+    if (errors) throw errors;
 
 	GLOBAL_MAP = mapData;
-	GLOBAL_DATA = _.union(from92to11, from2012to2015, only93);
-
-    if (errors) throw errors;
+	arrayData = [year2000, year2001, year2002, year2003, year2004, year2005, year2006, year2007, year2008, year2009, year2010, year2011, year2012, year2012, year2014, year2015];
     //create slide bar
 	var slider = document.getElementById('slider');
 	noUiSlider.create(slider, {
-		start: 2002,
+		start: 2015,
 		connect: [true, false],
 		step: 1,
 		range: {
@@ -523,10 +523,10 @@ function createVis(errors, mapData, from2012to2015, from92to11, only93) {
 	var stepSliderValueElement = document.getElementById('year');
 
 	slider.noUiSlider.on('update', function( values, handle ) {
-		Pace.restart();
 		stepSliderValueElement.innerHTML = Number(values[handle]);
 		GLOBAL_YEAR = Number(values[handle]).toString()
-		var history = getHistory(GLOBAL_DATA);
+		GLOBAL_DATA = filterYear(arrayData, GLOBAL_YEAR)
+		// var history = getHistory(GLOBAL_DATA);
 		var filteredData =	getFilterData();
 		drawMap(mapData, filteredData, "country_txt", ".world");
 		drawLine("#line", "#legend");
@@ -539,14 +539,26 @@ function createVis(errors, mapData, from2012to2015, from92to11, only93) {
 }
 
 function getFilterData(){
-	var dataByYear = filderByYear(GLOBAL_DATA, GLOBAL_YEAR );
-	var dataByType = filterByType(dataByYear, TYPE_OF_ATTACK);
+	var dataByType = filterByType(GLOBAL_DATA, TYPE_OF_ATTACK);
 	return dataByType;
 }
 
 d3.queue().defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/countries.geo.json")
-    .defer(d3.csv, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/data-society-global-terrorism-data/gtd_12to15_52134.csv")
-    .defer(d3.csv, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/data-society-global-terrorism-data/gtd_92to11_no%2093_55072.csv")
-    .defer(d3.csv, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/1993.csv")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2000.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2001.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2002.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2003.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2004.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2005.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2006.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2007.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2008.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2009.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2010.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2011.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2012.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2013.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2014.json")
+	.defer(d3.json, "https://raw.githubusercontent.com/hamiha/cis602-02-project/master/data/year2015.json")
     .await(createVis);
 
